@@ -1,10 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { asyncHandler, createError } from '../middleware/errorHandler';
-import { authorize } from '../middleware/auth';
+import { authMiddleware, requireEmployee, requireManager } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
 const router = Router();
+
+// Apply auth middleware to all routes
+router.use(authMiddleware);
 
 // Get all inventory items
 router.get('/', asyncHandler(async (req: Request, res: Response) => {
@@ -40,7 +43,7 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 // Create new inventory item (Manager only)
-router.post('/', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.post('/', requireManager, asyncHandler(async (req: Request, res: Response) => {
   const {
     name,
     description,
@@ -86,7 +89,7 @@ router.post('/', authorize(['manager', 'admin']), asyncHandler(async (req: Reque
 }));
 
 // Update inventory item (Manager only)
-router.put('/:id', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.put('/:id', requireManager, asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const updateData = req.body;
 
@@ -115,7 +118,7 @@ router.put('/:id', authorize(['manager', 'admin']), asyncHandler(async (req: Req
 }));
 
 // Delete inventory item (Manager only)
-router.delete('/:id', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.delete('/:id', requireManager, asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   // Soft delete by setting is_active to false
@@ -140,7 +143,7 @@ router.delete('/:id', authorize(['manager', 'admin']), asyncHandler(async (req: 
 }));
 
 // Update stock level
-router.patch('/:id/stock', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.patch('/:id/stock', requireManager, asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { quantity, operation = 'set' } = req.body; // operation: 'set', 'add', 'subtract'
 

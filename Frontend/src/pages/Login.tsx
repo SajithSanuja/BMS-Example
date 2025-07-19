@@ -25,7 +25,7 @@ import {
 
 const Login: React.FC = () => {
   const { isAuthenticated, login, isLoading, error } = useAuth();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [language, setLanguage] = useState<LanguageType>('en');
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +37,12 @@ const Login: React.FC = () => {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(username, password);
+    try {
+      await login(email, password);
+    } catch (error) {
+      // Error is already handled by the login function
+      console.error('Login error in component:', error);
+    }
   };
   
   return (
@@ -54,14 +59,15 @@ const Login: React.FC = () => {
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
-              {/* Username */}
+              {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
                   className="transition duration-200"
@@ -130,8 +136,8 @@ const Login: React.FC = () => {
               <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded-md">
                 <strong className="font-medium">Demo Credentials:</strong>
                 <div className="mt-1">
-                  <div>Manager: username: "manager", password: "password123"</div>
-                  <div>Employee: username: "employee", password: "password123"</div>
+                  <div>Manager: email: "manager@example.com", password: "password123"</div>
+                  <div>Employee: email: "employee@example.com", password: "password123"</div>
                 </div>
               </div>
             </CardContent>

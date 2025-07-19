@@ -85,6 +85,18 @@ const Index: React.FC = () => {
     user && card.roles.includes(user.role)
   );
 
+  // Debug logging
+  console.log('🏠 Index Page Debug:', {
+    user: user,
+    userRole: user?.role,
+    totalCards: moduleCards.length,
+    filteredCards: filteredCards.length,
+    userObject: JSON.stringify(user, null, 2)
+  });
+
+  // Temporary: Show all cards if filtered result is empty
+  const cardsToShow = filteredCards.length > 0 ? filteredCards : moduleCards;
+
   return (
     <Layout>
       <div className="container mx-auto animate-fade-in">
@@ -96,7 +108,7 @@ const Index: React.FC = () => {
                 "inline-block text-xs font-medium rounded-full px-2.5 py-0.5 mb-2",
                 user?.role === 'manager' ? "bg-manager/10 text-manager" : "bg-employee/10 text-employee"
               )}>
-                {user?.role === 'manager' ? 'Manager' : 'Employee'}
+                {user?.role === 'manager' ? 'Manager' : user?.role === 'admin' ? 'Admin' : 'Employee'}
               </div>
               <h1 className="text-3xl font-bold tracking-tight">
                 Welcome to <span className={cn(
@@ -107,12 +119,19 @@ const Index: React.FC = () => {
               <p className="text-muted-foreground">
                 Select a module to get started
               </p>
+              {/* Debug Info */}
+              {import.meta.env.DEV && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm">
+                  <strong>Debug:</strong> User: {user?.fullName} | Role: {user?.role} | 
+                  Cards: {cardsToShow.length}/{moduleCards.length}
+                </div>
+              )}
             </div>
           </div>
           
           {/* Module Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCards.map((card, index) => (
+            {cardsToShow.map((card, index) => (
               <Card 
                 key={card.title}
                 className="overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer hover-lift p-6"

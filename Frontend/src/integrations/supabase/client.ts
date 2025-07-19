@@ -2,10 +2,38 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://oyzsgcwjrfjudiopdnam.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95enNnY3dqcmZqdWRpb3BkbmFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3NjU2NTUsImV4cCI6MjA2ODM0MTY1NX0.O8W4ic8594QbZ1jyzMcFjd920ezaAq8D9LAa0Znld70";
+// Use environment variables with fallbacks
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://oyzsgcwjrfjudiopdnam.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95enNnY3dqcmZqdWRpb3BkbmFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3NjU2NTUsImV4cCI6MjA2ODM0MTY1NX0.O8W4ic8594QbZ1jyzMcFjd920ezaAq8D9LAa0Znld70";
+
+// Validate environment variables
+if (!SUPABASE_URL) {
+  throw new Error('Missing VITE_SUPABASE_URL environment variable');
+}
+
+if (!SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable');
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce', // Use PKCE flow for better security
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined, // Handle SSR
+    storageKey: 'bms-supabase-auth-token', // Custom storage key
+    debug: import.meta.env.DEV, // Enable debug in development
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'bms-frontend',
+    },
+  },
+});
+
+// Export auth helpers
+export const auth = supabase.auth;

@@ -35,6 +35,7 @@ export const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      state.isLoading = false; // Reset loading state
       state.error = null;
     },
     setUser: (state, action: PayloadAction<User>) => {
@@ -54,6 +55,7 @@ export const authSlice = createSlice({
       state.token = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
+      state.isLoading = false; // Reset loading state
       state.error = null;
     },
     clearError: (state) => {
