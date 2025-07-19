@@ -79,7 +79,7 @@ export const inventoryApi = apiSlice.injectEndpoints({
     }),
     
     getInventoryItem: builder.query<SingleInventoryResponse, string>({
-      query: (id) => API_CONFIG.ENDPOINTS.INVENTORY.DETAIL(id),
+      query: (id) => API_CONFIG.ENDPOINTS.INVENTORY.GET(id),
       providesTags: (result, error, id) => [{ type: 'Inventory', id }],
       transformResponse: (response: BackendSingleInventoryResponse): SingleInventoryResponse => ({
         data: transformInventoryItem(response.data)

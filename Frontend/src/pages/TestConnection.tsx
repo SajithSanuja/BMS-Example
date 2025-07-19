@@ -111,7 +111,7 @@ const TestConnectionPage: React.FC = () => {
                 {inventory.data.map((item) => (
                   <div key={item.id} className="border p-2 rounded text-sm">
                     <div className="font-medium">{item.name}</div>
-                    <div className="text-gray-600">SKU: {item.sku} | Stock: {item.current_stock}</div>
+                    <div className="text-gray-600">SKU: {item.sku} | Stock: {item.currentStock}</div>
                   </div>
                 ))}
               </div>
