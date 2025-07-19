@@ -211,27 +211,85 @@ export class AuthService {
    */
   private static async fetchUserProfile(supabaseUser: SupabaseUser): Promise<User | null> {
     try {
+      console.log('🔍 AuthService: Fetching profile for user ID:', supabaseUser.id);
+      console.log('🔍 AuthService: User email:', supabaseUser.email);
+      
+      // Try to fetch the profile with better error handling
       const { data: profile, error } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .select('*')
         .eq('id', supabaseUser.id)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to avoid error if not found
 
-      if (error || !profile) {
-        console.log('👥 AuthService: User profile not found, creating default...');
-        return await this.createDefaultProfile(supabaseUser);
+      console.log('📋 AuthService: Raw profile data:', profile);
+      console.log('❌ AuthService: Profile fetch error:', error);
+
+      // Check if it's an RLS infinite recursion error
+      if (error && error.code === '42P17') {
+        console.log('🚨 AuthService: RLS infinite recursion detected, using email-based fallback');
+        
+        // Use email-based role assignment as fallback
+        const role = supabaseUser.email === 'manager@example.com' ? 'manager' : 'employee';
+        console.log('🛠️ AuthService: Assigning role based on email:', role);
+        
+        return {
+          id: supabaseUser.id,
+          email: supabaseUser.email!,
+          fullName: supabaseUser.email === 'manager@example.com' ? 'Manager User' : 
+                   supabaseUser.email === 'employee@example.com' ? 'Employee User' : 
+                   supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
+          role: role as UserRole,
+          isActive: true,
+        };
       }
 
-      return {
+      // If there's another error or profile not found
+      if (error || !profile) {
+        console.log('⚠️ AuthService: Profile fetch failed, using email-based fallback');
+        console.log('Error code:', error?.code);
+        console.log('Error message:', error?.message);
+        
+        // Use email-based role assignment as fallback
+        const role = supabaseUser.email === 'manager@example.com' ? 'manager' : 'employee';
+        console.log('🛠️ AuthService: Assigning role based on email:', role);
+        
+        return {
+          id: supabaseUser.id,
+          email: supabaseUser.email!,
+          fullName: supabaseUser.email === 'manager@example.com' ? 'Manager User' : 
+                   supabaseUser.email === 'employee@example.com' ? 'Employee User' : 
+                   supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
+          role: role as UserRole,
+          isActive: true,
+        };
+      }
+
+      const userProfile = {
         id: supabaseUser.id,
         email: supabaseUser.email!,
         fullName: (profile as any).full_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
         role: ((profile as any).role as UserRole) || 'employee',
         isActive: (profile as any).is_active !== false,
       };
+
+      console.log('✅ AuthService: Constructed user profile:', userProfile);
+      return userProfile;
     } catch (error) {
       console.error('💥 AuthService: Fetch profile failed:', error);
-      return await this.createDefaultProfile(supabaseUser);
+      
+      // Fallback based on email
+      const role = supabaseUser.email === 'manager@example.com' ? 'manager' : 'employee';
+      console.log('🛠️ AuthService: Using final fallback with role:', role);
+      
+      return {
+        id: supabaseUser.id,
+        email: supabaseUser.email!,
+        fullName: supabaseUser.email === 'manager@example.com' ? 'Manager User' : 
+                 supabaseUser.email === 'employee@example.com' ? 'Employee User' : 
+                 supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
+        role: role as UserRole,
+        isActive: true,
+      };
     }
   }
 

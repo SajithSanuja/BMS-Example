@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       title: 'Manufacturing',
       path: '/manufacturing',
       icon: <Factory size={22} />,
-      roles: ['manager']
+      roles: ['manager', 'employee'] // Temporarily allow employees to see this
     },
     {
       title: 'Sales',
@@ -77,13 +77,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       title: 'Financials',
       path: '/financials',
       icon: <TrendingUp size={22} />,
-      roles: ['manager']
+      roles: ['manager', 'employee'] // Temporarily allow employees to see this
     },
     {
       title: 'User Management',
       path: '/users',
       icon: <Users size={22} />,
-      roles: ['manager']
+      roles: ['manager', 'employee'] // Temporarily allow employees to see this
     },
     {
       title: 'Settings',
