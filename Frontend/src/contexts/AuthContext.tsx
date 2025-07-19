@@ -44,7 +44,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        console.log('🔄 Initializing Supabase authentication...');
         dispatch(setLoading(true));
         dispatch(setError(null));
 
@@ -58,19 +57,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
 
-        console.log('📋 Session check result:', {
-          hasSession: !!currentSession,
-          userId: currentSession?.user?.id,
-          email: currentSession?.user?.email,
-          hasMetadata: SessionManager.hasMetadata(),
-        });
-
         setSession(currentSession);
 
         if (currentSession) {
           // Check if session is expired (12 hours)
           if (SessionManager.hasMetadata() && SessionManager.isExpired()) {
-            console.log('⏰ Session expired, signing out...');
             SessionManager.clear();
             await AuthService.signOut();
             dispatch(logout());
@@ -88,7 +79,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             return;
           }
 
-          console.log('✅ User restored from session:', currentUser.email);
           dispatch(setCredentials({
             user: currentUser,
             token: currentSession.access_token,
@@ -98,7 +88,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Store session metadata for 12-hour expiration
           SessionManager.store(currentSession);
         } else {
-          console.log('❌ No active session found');
           SessionManager.clear();
           dispatch(logout());
         }
@@ -108,7 +97,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         dispatch(logout());
         dispatch(setError('Authentication initialization failed'));
       } finally {
-        console.log('🏁 Auth initialization complete');
         setIsInitialized(true);
         dispatch(setLoading(false));
       }
@@ -122,7 +110,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (isInitialized && isLoading) {
       // Add a small delay to ensure all async operations complete
       const timer = setTimeout(() => {
-        console.log('⚠️ Safety: Clearing loading state after initialization');
         dispatch(setLoading(false));
       }, 100);
       
@@ -133,11 +120,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Listen for Supabase auth state changes
   useEffect(() => {
     const { data: { subscription } } = AuthService.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Supabase auth state change:', event, session?.user?.email);
-      
       // Skip processing during initialization to prevent race conditions
       if (!isInitialized && event === 'SIGNED_IN') {
-        console.log('⚠️ Skipping SIGNED_IN event during initialization');
         return;
       }
       
@@ -145,8 +129,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSession(session);
 
         if (event === 'SIGNED_IN' && session && isInitialized) {
-          console.log('✅ User signed in via Supabase (post-initialization)');
-          
           const { user: currentUser, error: userError } = await AuthService.getCurrentUser();
           
           if (userError || !currentUser) {
@@ -166,19 +148,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           dispatch(setLoading(false));
           
         } else if (event === 'SIGNED_OUT') {
-          console.log('👋 User signed out via Supabase');
           SessionManager.clear();
           dispatch(logout());
           
         } else if (event === 'TOKEN_REFRESHED' && session) {
-          console.log('🔄 Token refreshed via Supabase');
-          
           // Update session metadata
           SessionManager.store(session);
           
           // Check if session should expire
           if (SessionManager.hasMetadata() && SessionManager.isExpired()) {
-            console.log('⏰ Session expired after token refresh');
             SessionManager.clear();
             await AuthService.signOut();
             return;
@@ -194,11 +172,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
           
         } else if (event === 'INITIAL_SESSION') {
-          console.log('🔄 Initial session event via Supabase');
           // Don't do anything here, initialization handles this
           
         } else if (event === 'PASSWORD_RECOVERY') {
-          console.log('🔑 Password recovery event via Supabase');
           // Handle password recovery if needed
         }
       } catch (error: any) {
@@ -217,7 +193,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const checkSessionExpiration = () => {
       if (SessionManager.hasMetadata() && SessionManager.isExpired()) {
-        console.log('⏰ Session expired during periodic check');
         handleLogout();
       }
     };
@@ -230,7 +205,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Auth methods
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      console.log('🔐 Attempting login via AuthService:', email);
       dispatch(setLoading(true));
       dispatch(setError(null));
 
@@ -241,7 +215,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // The auth state change listener will handle setting the credentials
-      console.log('✅ Login successful, waiting for auth state change...');
       
     } catch (err: any) {
       const errorMessage = err?.message || 'Login failed';
@@ -254,7 +227,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (userData: RegisterData): Promise<void> => {
     try {
-      console.log('📝 Attempting registration via AuthService:', userData.email);
       dispatch(setLoading(true));
       dispatch(setError(null));
 
@@ -274,7 +246,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // The auth state change listener will handle setting the credentials
-      console.log('✅ Registration successful');
       
     } catch (err: any) {
       const errorMessage = err?.message || 'Registration failed';
@@ -288,7 +259,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleLogout = async (): Promise<void> => {
     try {
-      console.log('👋 Attempting logout via AuthService');
       SessionManager.clear();
       
       const { error } = await AuthService.signOut();
@@ -298,7 +268,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       // The auth state change listener will handle clearing the state
-      console.log('✅ Logout successful');
       
     } catch (err: any) {
       console.warn('Logout request failed, clearing local state:', err);

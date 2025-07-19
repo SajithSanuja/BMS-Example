@@ -26,7 +26,7 @@ const BottomNavigation: React.FC = () => {
       title: 'Manufacturing',
       path: '/manufacturing',
       icon: <Factory size={20} />,
-      roles: ['manager', 'employee'] // Temporarily allow employees to see this
+      roles: ['manager']
     },
     {
       title: 'Sales',
@@ -38,13 +38,13 @@ const BottomNavigation: React.FC = () => {
       title: 'Financials',
       path: '/financials',
       icon: <TrendingUp size={20} />,
-      roles: ['manager', 'employee'] // Temporarily allow employees to see this
+      roles: ['manager']
     },
     {
       title: 'User Management',
       path: '/users',
       icon: <Users size={20} />,
-      roles: ['manager', 'employee'] // Temporarily allow employees to see this
+      roles: ['manager']
     },
     {
       title: 'Settings',

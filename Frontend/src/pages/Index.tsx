@@ -85,15 +85,6 @@ const Index: React.FC = () => {
     user && card.roles.includes(user.role)
   );
 
-  // Debug logging
-  console.log('🏠 Index Page Debug:', {
-    user: user,
-    userRole: user?.role,
-    totalCards: moduleCards.length,
-    filteredCards: filteredCards.length,
-    userObject: JSON.stringify(user, null, 2)
-  });
-
   // Temporary: Show all cards if filtered result is empty
   const cardsToShow = filteredCards.length > 0 ? filteredCards : moduleCards;
 
@@ -119,13 +110,6 @@ const Index: React.FC = () => {
               <p className="text-muted-foreground">
                 Select a module to get started
               </p>
-              {/* Debug Info */}
-              {import.meta.env.DEV && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm">
-                  <strong>Debug:</strong> User: {user?.fullName} | Role: {user?.role} | 
-                  Cards: {cardsToShow.length}/{moduleCards.length}
-                </div>
-              )}
             </div>
           </div>
           

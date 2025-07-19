@@ -19,9 +19,6 @@ import FinancialsRoutes from "./financialsRoutes";
 import UserRoutes from "./userRoutes";
 import SettingsRoutes from "./settingsRoutes";
 import NotFound from "@/pages/NotFound";
-import SupabaseAuthTest from "@/pages/SupabaseAuthTest";
-import AuthResetTest from "@/pages/AuthResetTest";
-import AuthDebugPanel from "@/components/debug/AuthDebugPanel";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +31,6 @@ const AppRoutes = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner position="top-right" />
-              {import.meta.env.DEV && <AuthDebugPanel />}
               <BrowserRouter>
               <Routes>
                 {/* Public Routes */}
@@ -51,10 +47,6 @@ const AppRoutes = () => {
                 {FinancialsRoutes}
                 {UserRoutes}
                 {SettingsRoutes}
-                
-                {/* Auth Test Route */}
-                <Route path="/auth-test" element={<SupabaseAuthTest />} />
-                <Route path="/auth-reset" element={<AuthResetTest />} />
                 
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />

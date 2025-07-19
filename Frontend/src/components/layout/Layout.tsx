@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import BottomNavigation from './BottomNavigation';
-import UserDebugger from '@/components/UserDebugger';
 import { cn } from '@/lib/utils';
 
 interface LayoutProps {
@@ -68,9 +67,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       {/* Mobile Bottom Navigation */}
       {isAuthenticated && <BottomNavigation />}
-      
-      {/* Debug Component - Remove in production */}
-      {process.env.NODE_ENV === 'development' && <UserDebugger />}
     </div>
   );
 };
