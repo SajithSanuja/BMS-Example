@@ -83,53 +83,8 @@ export interface InventoryAdjustment {
   item: InventoryItem;
 }
 
-// Manufacturing types
-export interface Material {
-  id: string;
-  itemId: string;
-  name: string;
-  quantity: number;
-  unitOfMeasure: UnitOfMeasure;
-  costPerUnit?: number;
-  item?: InventoryItem;
-}
-
-export interface BOM {
-  id: string;
-  name?: string;
-  productName: string;
-  description: string;
-  materials: Material[];
-  finishedItemId?: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  totalCost?: number;
-  notes?: string;
-}
-
-export type ProductionStatus = 'planned' | 'in_progress' | 'in-progress' | 'completed' | 'cancelled';
-
-export interface ProductionOrder {
-  id: string;
-  bomId: string;
-  bom?: BOM;
-  quantityToProduce: number;
-  status: ProductionStatus;
-  startDate: Date;
-  laborHours?: number;
-  laborCost: number;
-  additionalCosts: number;
-  materialsIssued?: boolean;
-  totalCost?: number;
-  batchId?: string;
-  createdAt: Date;
-  completionDate?: Date;
-  orderNumber?: string;
-  notes?: string;
-}
-
 // Sales types
-export type SalesOrderStatus = 'draft' | 'confirmed' | 'shipped' | 'delivered' | 'pending' | 'processing' | 'completed' | 'cancelled';
+export type SalesOrderStatus = 'draft' | 'confirmed' | 'shipped' | 'delivered' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'returned';
 export type PaymentMethod = 'cash' | 'card' | 'bank' | 'internal';
 export type InvoiceStatus = 'pending' | 'paid' | 'cancelled';
 
@@ -236,55 +191,6 @@ export interface StockMovement {
   createdBy?: string;
 }
 
-// Procurement types
-export interface Supplier {
-  id: string;
-  name: string;
-  telephone: string;
-  address: string;
-  paymentTerms: string;
-  isActive?: boolean;
-  createdAt?: Date;
-}
-
-export interface PurchaseOrder {
-  id: string;
-  orderNumber: string;
-  supplier: Supplier;
-  items: PurchaseItem[];
-  status: 'draft' | 'sent' | 'received' | 'completed' | 'cancelled';
-  totalAmount: number;
-  createdAt: Date;
-  updatedAt?: Date;
-  expectedDeliveryDate?: Date;
-  notes?: string;
-}
-
-export interface PurchaseItem {
-  id: string;
-  name: string;
-  quantity: number;
-  unitCost: number;
-  totalCost: number;
-  receivedQuantity?: number;
-}
-
-export interface GoodsReceipt {
-  id: string;
-  purchaseOrderId: string;
-  receiptNumber: string;
-  items: GoodsReceiptItem[];
-  receivedDate: Date;
-  notes?: string;
-}
-
-export interface GoodsReceiptItem {
-  id: string;
-  purchaseItemId: string;
-  receivedQuantity: number;
-  notes?: string;
-}
-
 // Sales types
 export interface Customer {
   id: string;
@@ -333,13 +239,3 @@ export interface SalesReturnItem {
   unitPrice: number;
   totalPrice: number;
 }
-
-// Financial types
-export interface FinancialCategory {
-  id: string;
-  name: string;
-  type: 'income' | 'expense';
-  description?: string;
-}
-
-export type PurchaseOrderStatus = 'draft' | 'sent' | 'received' | 'completed' | 'cancelled';

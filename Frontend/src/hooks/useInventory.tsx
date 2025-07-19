@@ -73,6 +73,55 @@ export function useInventory() {
     return items.find((item) => item.id === id);
   }, [items]);
 
+  // Adjustment-related methods
+  const createInventoryAdjustment = useCallback(async (adjustmentData: {
+    itemId: string;
+    previousQuantity: number;
+    newQuantity: number;
+    reason: string;
+    notes?: string;
+  }) => {
+    try {
+      console.log('Creating inventory adjustment:', adjustmentData);
+      
+      // For now, we'll update the item stock directly
+      // In a full implementation, this would also create an adjustment record
+      const quantityChange = adjustmentData.newQuantity - adjustmentData.previousQuantity;
+      
+      await updateItem(adjustmentData.itemId, { 
+        currentStock: adjustmentData.newQuantity 
+      });
+
+      // Create a mock adjustment for the UI
+      const mockAdjustment = {
+        id: Date.now().toString(),
+        itemId: adjustmentData.itemId,
+        previousQuantity: adjustmentData.previousQuantity,
+        newQuantity: adjustmentData.newQuantity,
+        reason: adjustmentData.reason as any,
+        notes: adjustmentData.notes || '',
+        createdBy: 'current-user',
+        adjustmentDate: new Date(),
+        item: getItemById(adjustmentData.itemId)!
+      };
+
+      setAdjustments(prev => [mockAdjustment, ...prev]);
+      toast.success('Inventory adjustment created successfully');
+      
+      return mockAdjustment;
+    } catch (error: any) {
+      console.error('Error creating inventory adjustment:', error);
+      toast.error(error?.message || 'Failed to create inventory adjustment');
+      throw error;
+    }
+  }, [updateItem, getItemById]);
+
+  const fetchAdjustments = useCallback(async () => {
+    // For now, this is a placeholder
+    // In a full implementation, this would fetch from an API
+    console.log('Fetching adjustments...');
+  }, []);
+
   // For now, stock updates will be done through updateItem
   const updateItemStock = useCallback(async (id: string, newStock: number) => {
     const item = getItemById(id);
@@ -90,6 +139,8 @@ export function useInventory() {
     deleteItem,
     getItemById,
     updateItemStock,
+    createInventoryAdjustment,
+    fetchAdjustments,
     refetch
   };
 }

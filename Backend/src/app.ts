@@ -15,10 +15,6 @@ import { logger } from './utils/logger';
 import authRoutes from './routes/auth';
 import inventoryRoutes from './routes/inventory';
 import salesRoutes from './routes/sales';
-import manufacturingRoutes from './routes/manufacturing';
-import financialRoutes from './routes/financial';
-import userRoutes from './routes/users';
-import supplierRoutes from './routes/suppliers';
 import customerRoutes from './routes/customers';
 import auditRoutes from './routes/audit';
 
@@ -73,10 +69,6 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/inventory', authMiddleware, inventoryRoutes);
 app.use('/api/sales', authMiddleware, salesRoutes);
-app.use('/api/manufacturing', authMiddleware, manufacturingRoutes);
-app.use('/api/financial', authMiddleware, financialRoutes);
-app.use('/api/users', authMiddleware, userRoutes);
-app.use('/api/suppliers', authMiddleware, supplierRoutes);
 app.use('/api/customers', authMiddleware, customerRoutes);
 app.use('/api/audit', authMiddleware, auditRoutes);
 

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarLink } from '@/types';
-import { ShoppingCart, Package, Factory, DollarSign, Users, TrendingUp, Settings } from 'lucide-react';
+import { Package, DollarSign, Settings } from 'lucide-react';
 
 const BottomNavigation: React.FC = () => {
   const { user, checkAccess } = useAuth();
@@ -11,40 +11,16 @@ const BottomNavigation: React.FC = () => {
   
   const sidebarLinks: SidebarLink[] = [
     {
-      title: 'Procurement',
-      path: '/procurement',
-      icon: <ShoppingCart size={20} />,
-      roles: ['manager', 'employee']
-    },
-    {
       title: 'Inventory',
       path: '/inventory',
       icon: <Package size={20} />,
       roles: ['manager', 'employee']
     },
     {
-      title: 'Manufacturing',
-      path: '/manufacturing',
-      icon: <Factory size={20} />,
-      roles: ['manager']
-    },
-    {
       title: 'Sales',
       path: '/sales',
       icon: <DollarSign size={20} />,
       roles: ['manager', 'employee']
-    },
-    {
-      title: 'Financials',
-      path: '/financials',
-      icon: <TrendingUp size={20} />,
-      roles: ['manager']
-    },
-    {
-      title: 'User Management',
-      path: '/users',
-      icon: <Users size={20} />,
-      roles: ['manager']
     },
     {
       title: 'Settings',

@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { PurchaseOrder, SalesOrder } from '@/types';
+import { SalesOrder } from '@/types';
 
 // Company Information
 const COMPANY_INFO = {
@@ -208,59 +208,6 @@ export class PDFGenerator {
     }
   }
 
-  // Generate Purchase Order PDF
-  public generatePurchaseOrderPDF(order: PurchaseOrder, showPrint: boolean = true): void {
-    this.addHeader('PURCHASE ORDER');
-    
-    // Order Information
-    this.addSection('Order Information', {
-      'Order Number': order.orderNumber,
-      'Status': order.status.toUpperCase(),
-      'Order Date': new Date(order.createdAt).toLocaleDateString(),
-      'Expected Delivery': order.expectedDeliveryDate 
-        ? new Date(order.expectedDeliveryDate).toLocaleDateString() 
-        : 'Not specified'
-    });
-    
-    // Supplier Information
-    this.addSection('Supplier Information', {
-      'Supplier Name': order.supplier.name,
-      'Phone': order.supplier.telephone,
-      'Address': order.supplier.address,
-      'Payment Terms': order.supplier.paymentTerms
-    });
-    
-    // Items Table
-    this.doc.setFontSize(PDF_CONFIG.fontSize.header);
-    this.doc.setTextColor(...PDF_CONFIG.colors.secondary);
-    this.doc.text('Order Items', PDF_CONFIG.marginLeft, this.currentY);
-    this.currentY += 10;
-    
-    this.addItemsTable(
-      order.items,
-      ['name', 'quantity', 'unitCost', 'totalCost'],
-      ['Item Name', 'Quantity', 'Unit Cost', 'Total Cost']
-    );
-    
-    // Total
-    this.addTotal('Total Amount', order.totalAmount);
-    
-    // Notes
-    if (order.notes) {
-      this.addSection('Notes', { 'Additional Information': order.notes });
-    }
-    
-    this.addFooter();
-    
-    if (showPrint) {
-      // Open print preview
-      this.openPrintPreview(`purchase-order-${order.orderNumber}.pdf`);
-    } else {
-      // Just download
-      this.doc.save(`purchase-order-${order.orderNumber}.pdf`);
-    }
-  }
-
   // Generate Sales Order PDF
   public generateSalesOrderPDF(order: SalesOrder, showPrint: boolean = true): void {
     this.addHeader('SALES ORDER');
@@ -418,11 +365,6 @@ export class PDFGenerator {
 }
 
 // Export utility functions
-export const generatePurchaseOrderPDF = (order: PurchaseOrder, showPrint: boolean = true) => {
-  const generator = new PDFGenerator();
-  generator.generatePurchaseOrderPDF(order, showPrint);
-};
-
 export const generateSalesOrderPDF = (order: SalesOrder, showPrint: boolean = true) => {
   const generator = new PDFGenerator();
   generator.generateSalesOrderPDF(order, showPrint);

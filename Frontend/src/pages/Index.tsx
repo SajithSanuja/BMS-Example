@@ -6,14 +6,9 @@ import { cn } from '@/lib/utils';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import {
-  ShoppingCart,
   Package,
-  Factory,
   DollarSign,
-  TrendingUp,
-  Users,
-  Settings,
-  BarChart3
+  Settings
 } from 'lucide-react';
 
 const Index: React.FC = () => {
@@ -23,13 +18,6 @@ const Index: React.FC = () => {
   // Define module cards
   const moduleCards = [
     {
-      title: 'Procurement',
-      description: 'Manage purchase orders and suppliers',
-      icon: <ShoppingCart className="h-12 w-12 text-primary/70" />,
-      path: '/procurement',
-      roles: ['manager', 'employee']
-    },
-    {
       title: 'Inventory',
       description: 'Track stock levels and manage items',
       icon: <Package className="h-12 w-12 text-primary/70" />,
@@ -37,39 +25,11 @@ const Index: React.FC = () => {
       roles: ['manager', 'employee']
     },
     {
-      title: 'Manufacturing',
-      description: 'Plan production and track materials',
-      icon: <Factory className="h-12 w-12 text-primary/70" />,
-      path: '/manufacturing',
-      roles: ['manager']
-    },
-    {
       title: 'Sales',
       description: 'Process sales orders and manage customers',
       icon: <DollarSign className="h-12 w-12 text-primary/70" />,
       path: '/sales',
       roles: ['manager', 'employee']
-    },
-    {
-      title: 'Financials',
-      description: 'Track income and expenses',
-      icon: <TrendingUp className="h-12 w-12 text-primary/70" />,
-      path: '/financials',
-      roles: ['manager']
-    },
-    {
-      title: 'Analytics',
-      description: 'Generate reports and analyze data',
-      icon: <BarChart3 className="h-12 w-12 text-primary/70" />,
-      path: '/analytics',
-      roles: ['manager']
-    },
-    {
-      title: 'User Management',
-      description: 'Manage users and permissions',
-      icon: <Users className="h-12 w-12 text-primary/70" />,
-      path: '/users',
-      roles: ['manager']
     },
     {
       title: 'Settings',

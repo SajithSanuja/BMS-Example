@@ -65,13 +65,13 @@ const Adjustments = () => {
         return;
       }
       
-      await createInventoryAdjustment(
-        selectedItemId,
+      await createInventoryAdjustment({
+        itemId: selectedItemId,
         previousQuantity,
         newQuantity,
         reason,
         notes
-      );
+      });
       
       toast.success('Stock adjusted successfully');
       

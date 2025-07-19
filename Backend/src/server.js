@@ -137,7 +137,7 @@ const MOCK_INVENTORY = [
 ];
 
 // Authentication middleware
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -145,16 +145,74 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  // For now, just check if token exists and is not expired
-  if (token.startsWith('mock_token_')) {
-    req.user = {
-      id: '1',
-      email: 'manager@example.com',
-      role: 'manager'
-    };
-    next();
-  } else {
-    res.status(403).json({ error: 'Invalid token' });
+  try {
+    if (supabase) {
+      // Use real Supabase token verification
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      if (error || !user) {
+        return res.status(403).json({ error: 'Invalid token' });
+      }
+
+      // Get user profile to get role
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profile) {
+        // Create a default profile if it doesn't exist
+        const { data: newProfile, error: createError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: user.id,
+            full_name: user.user_metadata?.full_name || user.email,
+            role: 'manager', // Default to manager for testing
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Failed to create user profile:', createError);
+          return res.status(500).json({ error: 'Failed to create user profile' });
+        }
+
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: newProfile.role,
+          profile: newProfile
+        };
+      } else if (!profile.is_active) {
+        return res.status(403).json({ error: 'User profile inactive' });
+      } else {
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: profile.role,
+          profile: profile
+        };
+      }
+      
+      next();
+    } else {
+      // Fallback to mock authentication if Supabase is not configured
+      if (token.startsWith('mock_token_')) {
+        req.user = {
+          id: '1',
+          email: 'manager@example.com',
+          role: 'manager'
+        };
+        next();
+      } else {
+        res.status(403).json({ error: 'Invalid token' });
+      }
+    }
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(403).json({ error: 'Token verification failed' });
   }
 };
 
@@ -398,6 +456,7 @@ app.get('/api/inventory', authenticateToken, async (req, res) => {
       const { data, error } = await supabase
         .from('inventory_items')
         .select('*')
+        .eq('is_active', true)  // Only fetch active items
         .order('name');
 
       if (error) {
@@ -407,7 +466,9 @@ app.get('/api/inventory', authenticateToken, async (req, res) => {
 
       res.json({ data: data || [] });
     } else {
-      res.json({ data: MOCK_INVENTORY });
+      // Filter mock inventory to only show active items
+      const activeItems = MOCK_INVENTORY.filter(item => item.is_active !== false);
+      res.json({ data: activeItems });
     }
   } catch (error) {
     console.error('Inventory error:', error);
@@ -464,46 +525,54 @@ app.post('/api/inventory', authenticateToken, async (req, res) => {
       sku
     } = req.body;
 
-    if (!name || !category || !unit_of_measure || !sku) {
-      return res.status(400).json({ error: 'Name, category, unit of measure, and SKU are required' });
+    if (!name || !category || !unit_of_measure) {
+      return res.status(400).json({ error: 'Name, category, and unit of measure are required' });
     }
 
+    // Auto-generate SKU if not provided
+    const generatedSku = sku || `${category.toUpperCase().replace(/\s+/g, '_')}_${Date.now()}`;
+
     if (supabase) {
+      // Use real Supabase operations
       const { data, error } = await supabase
         .from('inventory_items')
         .insert({
           name,
-          description,
+          description: description || '',
           category,
           unit_of_measure,
-          purchase_cost: purchase_cost || 0,
-          selling_price: selling_price || 0,
-          current_stock: current_stock || 0,
-          reorder_level: reorder_level || 0,
-          sku,
+          purchase_cost: parseFloat(purchase_cost) || 0,
+          selling_price: parseFloat(selling_price) || 0,
+          current_stock: parseInt(current_stock) || 0,
+          reorder_level: parseInt(reorder_level) || 0,
+          sku: generatedSku,
           is_active: true
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Create inventory error:', error);
-        return res.status(500).json({ error: 'Failed to create inventory item' });
+        console.error('Supabase error:', error);
+        return res.status(500).json({ 
+          error: 'Failed to create inventory item', 
+          details: error.message 
+        });
       }
 
       res.status(201).json({ data });
     } else {
+      // Fallback to mock data if Supabase is not configured
       const newItem = {
         id: (MOCK_INVENTORY.length + 1).toString(),
         name,
         description: description || '',
         category,
         unit_of_measure,
-        purchase_cost: purchase_cost || 0,
-        selling_price: selling_price || 0,
-        current_stock: current_stock || 0,
-        reorder_level: reorder_level || 0,
-        sku,
+        purchase_cost: parseFloat(purchase_cost) || 0,
+        selling_price: parseFloat(selling_price) || 0,
+        current_stock: parseInt(current_stock) || 0,
+        reorder_level: parseInt(reorder_level) || 0,
+        sku: generatedSku,
         is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -514,6 +583,161 @@ app.post('/api/inventory', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Create inventory error:', error);
     res.status(500).json({ error: 'Failed to create inventory item' });
+  }
+});
+
+// Update inventory item (Manager only)
+app.put('/api/inventory/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'manager' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { id } = req.params;
+    console.log('🔧 Updating inventory item:', id);
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2));
+    
+    const {
+      name,
+      description,
+      category,
+      unit_of_measure,
+      purchase_cost,
+      selling_price,
+      current_stock,
+      reorder_level,
+      sku,
+      is_active
+    } = req.body;
+
+    if (supabase) {
+      // Use real Supabase operations
+      const updateData = {
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(category && { category }),
+        ...(unit_of_measure && { unit_of_measure }),
+        ...(purchase_cost !== undefined && { purchase_cost: parseFloat(purchase_cost) }),
+        ...(selling_price !== undefined && { selling_price: parseFloat(selling_price) }),
+        ...(current_stock !== undefined && { current_stock: parseInt(current_stock) }),
+        ...(reorder_level !== undefined && { reorder_level: parseInt(reorder_level) }),
+        ...(sku && { sku }),
+        ...(is_active !== undefined && { is_active }),
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('📝 Supabase update data:', JSON.stringify(updateData, null, 2));
+      
+      const { data, error } = await supabase
+        .from('inventory_items')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        return res.status(500).json({ 
+          error: 'Failed to update inventory item', 
+          details: error.message 
+        });
+      }
+
+      if (!data) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+
+      console.log('✅ Updated item:', JSON.stringify(data, null, 2));
+      res.json({ data });
+    } else {
+      // Fallback to mock data if Supabase is not configured
+      const itemIndex = MOCK_INVENTORY.findIndex(item => item.id === id);
+      
+      if (itemIndex === -1) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+
+      const updatedItem = {
+        ...MOCK_INVENTORY[itemIndex],
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(category && { category }),
+        ...(unit_of_measure && { unit_of_measure }),
+        ...(purchase_cost !== undefined && { purchase_cost: parseFloat(purchase_cost) }),
+        ...(selling_price !== undefined && { selling_price: parseFloat(selling_price) }),
+        ...(current_stock !== undefined && { current_stock: parseInt(current_stock) }),
+        ...(reorder_level !== undefined && { reorder_level: parseInt(reorder_level) }),
+        ...(sku && { sku }),
+        ...(is_active !== undefined && { is_active }),
+        updated_at: new Date().toISOString()
+      };
+
+      MOCK_INVENTORY[itemIndex] = updatedItem;
+      res.json({ data: updatedItem });
+    }
+  } catch (error) {
+    console.error('Update inventory error:', error);
+    res.status(500).json({ error: 'Failed to update inventory item' });
+  }
+});
+
+// Delete inventory item (Manager only)
+app.delete('/api/inventory/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'manager' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { id } = req.params;
+    console.log('🗑️ Deleting inventory item:', id);
+
+    if (supabase) {
+      // Use real Supabase operations (soft delete)
+      const { data, error } = await supabase
+        .from('inventory_items')
+        .update({ 
+          is_active: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase delete error:', error);
+        return res.status(500).json({ 
+          error: 'Failed to delete inventory item', 
+          details: error.message 
+        });
+      }
+
+      if (!data) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+
+      console.log('✅ Item soft deleted:', id);
+      res.json({ message: 'Item deleted successfully', data });
+    } else {
+      // Fallback to mock data if Supabase is not configured
+      const itemIndex = MOCK_INVENTORY.findIndex(item => item.id === id);
+      
+      if (itemIndex === -1) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+
+      // Soft delete by setting is_active to false
+      MOCK_INVENTORY[itemIndex] = {
+        ...MOCK_INVENTORY[itemIndex],
+        is_active: false,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('✅ Mock item soft deleted:', id);
+      res.json({ message: 'Item deleted successfully', data: MOCK_INVENTORY[itemIndex] });
+    }
+  } catch (error) {
+    console.error('Delete inventory error:', error);
+    res.status(500).json({ error: 'Failed to delete inventory item' });
   }
 });
 
@@ -559,7 +783,9 @@ app.use('*', (req, res) => {
       'POST /api/auth/logout',
       'GET /api/inventory',
       'POST /api/inventory',
-      'GET /api/inventory/:id'
+      'GET /api/inventory/:id',
+      'PUT /api/inventory/:id',
+      'DELETE /api/inventory/:id'
     ]
   });
 });
@@ -587,6 +813,8 @@ app.listen(PORT, () => {
   console.log('  GET  /api/auth/me');
   console.log('  GET  /api/inventory');
   console.log('  POST /api/inventory');
+  console.log('  PUT  /api/inventory/:id');
+  console.log('  DELETE /api/inventory/:id');
   console.log('');
   console.log('Test login:');
   console.log('  Email: manager@example.com');

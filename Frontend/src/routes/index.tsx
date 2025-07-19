@@ -11,12 +11,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // Route modules
 import PublicRoutes from "./publicRoutes";
 import ProtectedRoutes from "./protectedRoutes";
-import ProcurementRoutes from "./procurementRoutes";
 import InventoryRoutes from "./inventoryRoutes";
-import ManufacturingRoutes from "./manufacturingRoutes";
 import SalesRoutes from "./salesRoutes";
-import FinancialsRoutes from "./financialsRoutes";
-import UserRoutes from "./userRoutes";
 import SettingsRoutes from "./settingsRoutes";
 import NotFound from "@/pages/NotFound";
 
@@ -40,12 +36,8 @@ const AppRoutes = () => {
                 {ProtectedRoutes}
                 
                 {/* Module Routes */}
-                {ProcurementRoutes}
                 {InventoryRoutes}
-                {ManufacturingRoutes}
                 {SalesRoutes}
-                {FinancialsRoutes}
-                {UserRoutes}
                 {SettingsRoutes}
                 
                 {/* 404 Route */}

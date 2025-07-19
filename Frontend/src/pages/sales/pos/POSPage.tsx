@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import { ShoppingCart as ShoppingCartIcon, Search, Loader2, X, Plus, Minus, Download, FileText, Printer } from 'lucide-react';
 import { PaymentMethod } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useFinancials } from '@/hooks/useFinancials';
 import { v4 as uuidv4 } from 'uuid';
 import * as XLSX from 'xlsx';
 
@@ -214,7 +213,6 @@ const POSPage = () => {
   const navigate = useNavigate();
   const { items } = useInventory();
   const { customers, salesOrders, addSalesOrder, fetchCustomers, fetchSalesOrders } = useSales();
-  const { addTransaction } = useFinancials();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [cartItems, setCartItems] = useState([]);
@@ -363,18 +361,6 @@ const POSPage = () => {
         status: 'completed'
       });
       
-      const transactionAmount = calculateTotal();
-      
-      // Use object parameter style for addTransaction
-      await addTransaction({
-        type: 'income',
-        amount: transactionAmount,
-        category: 'sales',
-        description: `POS Sale #${order.orderNumber}`,
-        date: new Date(),
-        paymentMethod: paymentMethod as PaymentMethod
-      });
-      
       const customerName = selectedCustomer && selectedCustomer !== 'walk-in'
         ? customers.find(c => c.id === selectedCustomer)?.name || 'Walk-in Customer'
         : 'Walk-in Customer';
@@ -469,16 +455,6 @@ const POSPage = () => {
   
   useEffect(() => {
     if (paymentStatus === 'success') {
-      // Use object parameter style for addTransaction
-      addTransaction({
-        type: 'income',
-        amount: calculateTotal(),
-        category: 'sales',
-        description: `POS Sale - ${new Date().toISOString()}`,
-        date: new Date(),
-        paymentMethod: paymentMethod as PaymentMethod
-      });
-      
       setCompletedSales([{
         id: uuidv4(),
         orderNumber: 'POS Sale - ' + new Date().toISOString(),

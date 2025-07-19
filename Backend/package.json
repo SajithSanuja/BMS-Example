@@ -4,10 +4,10 @@
   "description": "Mini ERP System Backend API",
   "main": "dist/app.js",
   "scripts": {
-    "dev": "nodemon src/simple-app.js",
+    "dev": "nodemon src/server.js",
     "dev-ts": "nodemon --exec tsx src/app.ts",
     "build": "tsc",
-    "start": "node src/simple-app.js",
+    "start": "node src/server.js",
     "start-built": "node dist/app.js",
     "lint": "eslint src/**/*.ts",
     "test": "node test-complete.js",

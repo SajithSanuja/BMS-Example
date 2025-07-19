@@ -68,6 +68,24 @@ const transformInventoryItem = (backendItem: BackendInventoryItem): InventoryIte
   updatedAt: new Date(backendItem.updated_at),
 });
 
+// Transform frontend camelCase to backend snake_case for updates
+const transformInventoryItemForUpdate = (frontendItem: Partial<InventoryItem>): any => {
+  const transformed: any = {};
+  
+  if (frontendItem.name !== undefined) transformed.name = frontendItem.name;
+  if (frontendItem.description !== undefined) transformed.description = frontendItem.description;
+  if (frontendItem.category !== undefined) transformed.category = frontendItem.category;
+  if (frontendItem.unitOfMeasure !== undefined) transformed.unit_of_measure = frontendItem.unitOfMeasure;
+  if (frontendItem.purchaseCost !== undefined) transformed.purchase_cost = frontendItem.purchaseCost;
+  if (frontendItem.sellingPrice !== undefined) transformed.selling_price = frontendItem.sellingPrice;
+  if (frontendItem.currentStock !== undefined) transformed.current_stock = frontendItem.currentStock;
+  if (frontendItem.reorderLevel !== undefined) transformed.reorder_level = frontendItem.reorderLevel;
+  if (frontendItem.isActive !== undefined) transformed.is_active = frontendItem.isActive;
+  if (frontendItem.sku !== undefined) transformed.sku = frontendItem.sku;
+  
+  return transformed;
+};
+
 export const inventoryApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getInventoryItems: builder.query<InventoryResponse, void>({
@@ -102,7 +120,7 @@ export const inventoryApi = apiSlice.injectEndpoints({
       query: ({ id, updates }) => ({
         url: API_CONFIG.ENDPOINTS.INVENTORY.UPDATE(id),
         method: 'PUT',
-        body: updates,
+        body: transformInventoryItemForUpdate(updates),
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'Inventory', id }, 'Inventory'],
       transformResponse: (response: BackendSingleInventoryResponse): SingleInventoryResponse => ({

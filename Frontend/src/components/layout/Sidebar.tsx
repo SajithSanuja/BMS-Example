@@ -4,7 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarLink } from '@/types';
-import { ChevronLeft, ChevronRight, ShoppingCart, Package, Factory, DollarSign, Users, Menu, TrendingUp, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package, DollarSign, Menu, Settings } from 'lucide-react';
 
 interface SidebarProps {
   isCollapsed?: boolean;
@@ -50,40 +50,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   
   const sidebarLinks: SidebarLink[] = [
     {
-      title: 'Procurement',
-      path: '/procurement',
-      icon: <ShoppingCart size={22} />,
-      roles: ['manager', 'employee']
-    },
-    {
       title: 'Inventory',
       path: '/inventory',
       icon: <Package size={22} />,
       roles: ['manager', 'employee']
     },
     {
-      title: 'Manufacturing',
-      path: '/manufacturing',
-      icon: <Factory size={22} />,
-      roles: ['manager']
-    },
-    {
       title: 'Sales',
       path: '/sales',
       icon: <DollarSign size={22} />,
       roles: ['manager', 'employee']
-    },
-    {
-      title: 'Financials',
-      path: '/financials',
-      icon: <TrendingUp size={22} />,
-      roles: ['manager']
-    },
-    {
-      title: 'User Management',
-      path: '/users',
-      icon: <Users size={22} />,
-      roles: ['manager']
     },
     {
       title: 'Settings',

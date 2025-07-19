@@ -13,14 +13,12 @@ import { toast } from 'sonner';
 import { Search, Loader2, X, Plus, Minus, Download, FileText, Printer, PackageCheck, PackageX } from 'lucide-react';
 import { PaymentMethod, SalesOrderStatus } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useFinancials } from '@/hooks/useFinancials';
 import { Separator } from '@/components/ui/separator';
 
 const SalesReturnsPage = () => {
   const navigate = useNavigate();
   const { salesOrders, fetchSalesOrders, updateSalesOrder } = useSales();
   const { items } = useInventory();
-  const { addTransaction } = useFinancials();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -99,17 +97,6 @@ const SalesReturnsPage = () => {
 
       // Update the sales order status
       await updateSalesOrder(selectedOrder.id, { status: 'returned' as SalesOrderStatus });
-
-      // Create a financial transaction record with all required parameters
-      await addTransaction(
-        'expense',
-        totalReturnAmount,
-        'returns',
-        `Return for Order #${selectedOrder.orderNumber}`,
-        new Date(),
-        selectedOrder.paymentMethod,
-        `RET-${selectedOrder.orderNumber}`
-      );
 
       toast.success('Return processed successfully');
       navigate('/sales/orders'); // Redirect to sales orders page

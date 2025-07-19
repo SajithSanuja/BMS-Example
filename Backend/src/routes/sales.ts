@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { asyncHandler, createError } from '../middleware/errorHandler';
-import { authorize } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -74,7 +73,7 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
 }));
 
 // Create new sales order
-router.post('/', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.post('/', asyncHandler(async (req: Request, res: Response) => {
   const { customer_id, items, notes, delivery_address } = req.body;
 
   // Validate input
@@ -189,7 +188,7 @@ router.post('/', authorize(['manager', 'admin']), asyncHandler(async (req: Reque
 }));
 
 // Update sales order status
-router.patch('/:id/status', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.patch('/:id/status', asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status, notes } = req.body;
 
@@ -221,7 +220,7 @@ router.patch('/:id/status', authorize(['manager', 'admin']), asyncHandler(async 
 }));
 
 // Cancel sales order
-router.delete('/:id', authorize(['manager', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   // Check if order can be cancelled
