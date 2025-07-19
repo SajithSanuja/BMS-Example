@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { FileText, BarChart } from 'lucide-react';
 
 const FinancialsPage = () => {

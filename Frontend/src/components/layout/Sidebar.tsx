@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { SidebarLink } from '@/types';
 import { ChevronLeft, ChevronRight, ShoppingCart, Package, Factory, DollarSign, Users, Menu, TrendingUp, Settings } from 'lucide-react';
 

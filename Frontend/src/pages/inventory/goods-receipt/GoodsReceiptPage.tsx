@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Package, Check } from 'lucide-react';
 import { usePurchaseOrders } from '@/hooks/usePurchaseOrders';
 import { useInventory } from '@/hooks/useInventory';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const GoodsReceiptPage = () => {

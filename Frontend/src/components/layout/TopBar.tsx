@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Bell, 
   Settings, 

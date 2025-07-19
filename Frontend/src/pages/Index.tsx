@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';

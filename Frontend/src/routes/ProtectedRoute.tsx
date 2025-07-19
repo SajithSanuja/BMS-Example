@@ -1,6 +1,6 @@
 
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/NewAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
 import { toast } from "sonner";
 

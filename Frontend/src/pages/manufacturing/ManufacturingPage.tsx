@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileSpreadsheet, Factory, ClipboardList, PackageCheck } from 'lucide-react';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ManufacturingPage = () => {
   const navigate = useNavigate();

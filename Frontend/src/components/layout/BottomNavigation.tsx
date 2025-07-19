@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { SidebarLink } from '@/types';
 import { ShoppingCart, Package, Factory, DollarSign, Users, TrendingUp, Settings } from 'lucide-react';
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Warehouse, RefreshCw, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const InventoryPage = () => {
   const navigate = useNavigate();

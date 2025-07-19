@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { UserRole, LanguageType } from '@/types';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';

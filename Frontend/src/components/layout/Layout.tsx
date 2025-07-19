@@ -1,6 +1,6 @@
 
 import React, { ReactNode, useState } from 'react';
-import { useAuth } from '@/contexts/NewAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import BottomNavigation from './BottomNavigation';
