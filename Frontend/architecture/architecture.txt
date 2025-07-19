@@ -1,0 +1,407 @@
+MINI ERP SYSTEM - RECOMMENDED ARCHITECTURE
+=====================================================
+
+OVERVIEW
+--------
+This document describes the recommended architecture for redeveloping the mini ERP system using:
+- Frontend: React + TypeScript + Vite
+- Backend: Node.js + Express.js
+- Database: Supabase (PostgreSQL)
+- Authentication: Supabase Auth with JWT
+- Deployment: Docker containerization
+
+SYSTEM ARCHITECTURE
+===================
+
+┌─────────────────────────────────────────────────────────────┐
+│                      CLIENT TIER                            │
+├─────────────────────────────────────────────────────────────┤
+│ React 18 + TypeScript + Vite                               │
+│ • UI Framework: React with TypeScript                      │
+│ • Build Tool: Vite for fast development                    │
+│ • Styling: Tailwind CSS + shadcn/ui components            │
+│ • State Management: Redux Toolkit + RTK Query             │
+│ • Form Handling: React Hook Form + Zod validation         │
+│ • HTTP Client: Axios with interceptors                    │
+│ • Authentication: Supabase Auth Client                    │
+│ • Routing: React Router v6                                │
+│ • Real-time: Supabase real-time subscriptions            │
+└─────────────────────────────────────────────────────────────┘
+                              ↕️ HTTPS/WSS
+┌─────────────────────────────────────────────────────────────┐
+│                      API TIER                               │
+├─────────────────────────────────────────────────────────────┤
+│ Node.js + Express.js REST API                              │
+│ • Authentication: Supabase JWT validation                  │
+│ • Authorization: Role-based access control (RBAC)         │
+│ • Input Validation: Joi/Zod schemas                       │
+│ • Security: Helmet, CORS, Rate limiting                   │
+│ • Logging: Winston structured logging                     │
+│ • Error Handling: Centralized error middleware            │
+│ • File Upload: Multer + Supabase Storage                  │
+│ • Background Jobs: Bull Queue + Redis                     │
+└─────────────────────────────────────────────────────────────┘
+                              ↕️ SQL/Real-time
+┌─────────────────────────────────────────────────────────────┐
+│                    DATABASE TIER                            │
+├─────────────────────────────────────────────────────────────┤
+│ Supabase (PostgreSQL + Auth + Storage + Real-time)        │
+│ • Authentication: Built-in user management                 │
+│ • Database: PostgreSQL with Row Level Security (RLS)      │
+│ • Storage: File storage for documents/images              │
+│ • Real-time: WebSocket connections                        │
+│ • Backup: Automated daily backups                         │
+└─────────────────────────────────────────────────────────────┘
+
+PROJECT STRUCTURE
+==================
+
+Frontend (React App):
+---------------------
+client/
+├── src/
+│   ├── components/           # Reusable UI components
+│   │   ├── common/          # Shared components (buttons, forms)
+│   │   ├── layout/          # Layout components (header, sidebar)
+│   │   └── modules/         # Feature-specific components
+│   ├── pages/               # Route components
+│   │   ├── auth/           # Login, register, forgot password
+│   │   ├── dashboard/      # Main dashboard
+│   │   ├── inventory/      # Inventory management
+│   │   ├── sales/          # Sales management
+│   │   ├── manufacturing/  # Manufacturing module
+│   │   └── reports/        # Reporting pages
+│   ├── store/              # Redux store configuration
+│   │   ├── slices/         # Redux slices for each module
+│   │   └── api/            # RTK Query API slices
+│   ├── hooks/              # Custom React hooks
+│   ├── services/           # API service functions
+│   ├── utils/              # Utility functions
+│   ├── types/              # TypeScript type definitions
+│   └── constants/          # Application constants
+├── public/                 # Static assets
+└── package.json
+
+Backend (Express API):
+---------------------
+server/
+├── src/
+│   ├── controllers/        # Request handlers
+│   │   ├── authController.js
+│   │   ├── inventoryController.js
+│   │   ├── salesController.js
+│   │   └── manufacturingController.js
+│   ├── middleware/         # Custom middleware
+│   │   ├── auth.js        # Authentication middleware
+│   │   ├── authorize.js   # Authorization middleware
+│   │   ├── validation.js  # Input validation
+│   │   └── errorHandler.js # Error handling
+│   ├── routes/             # API route definitions
+│   │   ├── auth.js
+│   │   ├── inventory.js
+│   │   ├── sales.js
+│   │   └── manufacturing.js
+│   ├── services/           # Business logic layer
+│   │   ├── authService.js
+│   │   ├── inventoryService.js
+│   │   └── auditService.js
+│   ├── utils/              # Utility functions
+│   │   ├── logger.js
+│   │   ├── emailService.js
+│   │   └── pdfGenerator.js
+│   ├── config/             # Configuration files
+│   │   ├── database.js
+│   │   └── supabase.js
+│   └── app.js              # Express app setup
+└── package.json
+
+DATABASE STRUCTURE
+==================
+
+Core Tables:
+-----------
+1. auth.users (Supabase managed)
+   - id, email, encrypted_password, email_confirmed_at, etc.
+
+2. user_profiles
+   - id (FK to auth.users), full_name, role, is_active, created_at, updated_at
+
+3. inventory_items
+   - id, name, description, category, unit_of_measure, purchase_cost, 
+     selling_price, current_stock, reorder_level, sku, is_active
+
+4. sales_orders
+   - id, order_number, customer_id, status, order_date, total_amount, 
+     payment_method, created_by, created_at, updated_at
+
+5. sales_order_items
+   - id, sales_order_id, product_id, quantity, unit_price, total_price
+
+6. customers
+   - id, name, email, phone, address, created_at, updated_at
+
+7. suppliers
+   - id, name, contact_info, payment_terms, is_active
+
+8. purchase_orders
+   - id, order_number, supplier_id, status, total_amount, expected_delivery
+
+9. production_orders
+   - id, bom_id, quantity_to_produce, status, start_date, completion_date
+
+10. audit_logs
+    - id, user_id, table_name, record_id, action, old_values, new_values, timestamp
+
+Row Level Security (RLS) Policies:
+----------------------------------
+- Users can only access data they own or have permission to view
+- Managers have broader access across all modules
+- Employees have limited access based on their role
+- All tables have appropriate RLS policies
+
+SECURITY MECHANISMS
+==================
+
+1. Authentication (Supabase Auth):
+   - JWT tokens for session management
+   - Automatic token refresh
+   - Password hashing with bcrypt
+   - Email verification required
+   - Password reset functionality
+   - Multi-factor authentication support
+
+2. Authorization (Role-Based Access Control):
+   - User roles: manager, employee, admin
+   - Permission-based access to API endpoints
+   - Frontend route protection
+   - Database-level Row Level Security
+
+3. Input Validation:
+   - Frontend: Zod schemas with React Hook Form
+   - Backend: Joi/Zod validation middleware
+   - SQL injection prevention through parameterized queries
+   - XSS protection through input sanitization
+
+4. API Security:
+   - HTTPS enforcement
+   - CORS configuration
+   - Rate limiting (100 requests/15 minutes per IP)
+   - Helmet.js for security headers
+   - Request size limits
+   - JWT token validation on all protected routes
+
+5. Database Security:
+   - Row Level Security (RLS) enabled on all tables
+   - Encrypted data at rest
+   - Connection pooling with SSL
+   - Regular security updates
+
+COMMUNICATION FLOW
+==================
+
+Frontend ↔ Backend Communication:
+---------------------------------
+1. HTTP/HTTPS REST API calls
+2. JSON data format
+3. JWT tokens in Authorization header
+4. Real-time updates via WebSocket (Supabase)
+
+Request Flow:
+------------
+1. User action triggers API call
+2. Frontend sends HTTP request with JWT token
+3. Backend validates JWT token with Supabase
+4. Authorization middleware checks user permissions
+5. Input validation middleware validates request data
+6. Controller processes business logic
+7. Database query executed with user context (RLS)
+8. Response sent back to frontend
+9. Frontend updates UI state
+
+WebSocket Communication:
+-----------------------
+- Real-time inventory updates
+- Live order status changes
+- User presence indicators
+- System notifications
+
+USER VERIFICATION & AUTHORIZATION
+=================================
+
+Authentication Flow:
+-------------------
+1. User enters credentials (email/password)
+2. Frontend sends credentials to Supabase Auth
+3. Supabase validates credentials and returns JWT token
+4. Frontend stores token in memory (not localStorage)
+5. Token included in all subsequent API requests
+6. Backend validates token with Supabase on each request
+7. User context attached to request object
+
+Authorization Process:
+---------------------
+1. Extract JWT token from Authorization header
+2. Validate token with Supabase auth service
+3. Retrieve user profile with role information
+4. Check user permissions against required roles
+5. Allow/deny access based on authorization rules
+
+Role-Based Permissions:
+----------------------
+Manager Role:
+- Full access to all modules
+- Can create/edit/delete inventory items
+- Can view all sales orders and reports
+- Can manage users and settings
+- Can access audit logs
+
+Employee Role:
+- Limited access to assigned modules
+- Can create sales orders
+- Can view inventory (read-only)
+- Can update their own profile
+- Cannot access admin functions
+
+REQUEST PROCESSING WORKFLOW
+===========================
+
+1. Request Initiation:
+   - User interacts with frontend
+   - Frontend validates input (Zod schemas)
+   - API call made with JWT token
+
+2. Authentication Check:
+   - Backend extracts JWT from Authorization header
+   - Token validated with Supabase auth service
+   - User context retrieved and attached to request
+
+3. Authorization Check:
+   - User role and permissions verified
+   - Route access validated against user permissions
+   - Request blocked if insufficient permissions
+
+4. Input Validation:
+   - Request body validated against schemas
+   - Data sanitized to prevent XSS/injection
+   - Malformed requests rejected
+
+5. Business Logic Processing:
+   - Controller delegates to service layer
+   - Database operations performed with user context
+   - Row Level Security enforced automatically
+
+6. Response Generation:
+   - Success/error response formatted
+   - Audit log entry created for sensitive operations
+   - Response sent back to frontend
+
+7. Frontend Update:
+   - Response processed by Redux store
+   - UI updated with new data
+   - Error messages displayed if needed
+
+DEPLOYMENT ARCHITECTURE
+=======================
+
+Development Environment:
+-----------------------
+- Frontend: Vite dev server (localhost:3000)
+- Backend: Node.js server (localhost:5000)
+- Database: Supabase cloud instance
+- Redis: Local Redis instance for caching
+
+Production Environment:
+----------------------
+- Frontend: Nginx serving static files
+- Backend: Node.js with PM2 process manager
+- Database: Supabase production instance
+- Load Balancer: Nginx for API load balancing
+- SSL: Let's Encrypt certificates
+- Monitoring: Application and infrastructure monitoring
+
+Container Setup:
+---------------
+- Docker containers for each service
+- Docker Compose for local development
+- Kubernetes for production orchestration
+- Environment-specific configuration
+
+MONITORING & LOGGING
+====================
+
+Application Monitoring:
+----------------------
+- Structured logging with Winston
+- Error tracking with Sentry
+- Performance monitoring
+- User activity tracking
+- System health checks
+
+Security Monitoring:
+-------------------
+- Failed authentication attempts
+- Suspicious activity detection
+- Rate limiting violations
+- Audit trail for sensitive operations
+
+BACKUP & RECOVERY
+==================
+
+Database Backup:
+---------------
+- Automated daily backups via Supabase
+- Point-in-time recovery capability
+- Backup verification procedures
+- Disaster recovery plan
+
+File Storage Backup:
+-------------------
+- Supabase Storage automatic backups
+- File versioning for critical documents
+- Cross-region replication
+
+SCALABILITY CONSIDERATIONS
+=========================
+
+Horizontal Scaling:
+------------------
+- Load balancer for multiple API instances
+- Redis cluster for session management
+- Database read replicas for reporting
+- CDN for static asset delivery
+
+Performance Optimization:
+------------------------
+- Database query optimization
+- API response caching
+- Lazy loading for frontend components
+- Image optimization and compression
+
+MIGRATION STRATEGY
+==================
+
+Phase 1: Foundation (Weeks 1-2):
+- Set up development environment
+- Create basic project structure
+- Implement authentication system
+- Set up database schema with RLS
+
+Phase 2: Core Features (Weeks 3-4):
+- Implement inventory management
+- Create sales order system
+- Build user management
+- Add input validation
+
+Phase 3: Advanced Features (Weeks 5-6):
+- Add manufacturing module
+- Implement reporting system
+- Create audit logging
+- Add real-time features
+
+Phase 4: Security & Testing (Weeks 7-8):
+- Security audit and testing
+- Performance optimization
+- Documentation completion
+- Deployment preparation
+
+This architecture provides enterprise-grade security, scalability, and maintainability while being cost-effective and developer-friendly.
