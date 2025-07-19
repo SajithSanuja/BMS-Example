@@ -16,14 +16,14 @@ build/
 out/
 
 # Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.development
-.env.production
-.env.staging
+# .env
+# .env.local
+# .env.development.local
+# .env.test.local
+# .env.production.local
+# .env.development
+# .env.production
+# .env.staging
 
 # IDE and editor files
 .vscode/
@@ -70,7 +70,7 @@ bower_components/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+# .env
 
 # parcel-bundler cache
 .cache/
@@ -146,8 +146,8 @@ dist/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.test
+# .env
+# .env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
