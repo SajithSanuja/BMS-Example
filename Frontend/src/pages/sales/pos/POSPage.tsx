@@ -385,7 +385,7 @@ const POSPage = () => {
         date: new Date(),
         customer: customerName,
         paymentMethod: paymentMethod,
-        totalAmount: transactionAmount,
+        totalAmount: calculateTotal(),
         items: cartItems
       }, ...completedSales]);
       

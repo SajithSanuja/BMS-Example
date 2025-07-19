@@ -25,11 +25,11 @@ const PDF_CONFIG = {
     small: 8
   },
   colors: {
-    primary: [41, 128, 185], // Blue
-    secondary: [52, 73, 94], // Dark gray
-    accent: [231, 76, 60],   // Red
-    text: [44, 62, 80],      // Dark blue-gray
-    light: [149, 165, 166]   // Light gray
+    primary: [41, 128, 185] as [number, number, number], // Blue
+    secondary: [52, 73, 94] as [number, number, number], // Dark gray
+    accent: [231, 76, 60] as [number, number, number],   // Red
+    text: [44, 62, 80] as [number, number, number],      // Dark blue-gray
+    light: [149, 165, 166] as [number, number, number]   // Light gray
   }
 };
 
